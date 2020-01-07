@@ -151,7 +151,7 @@ if [ ! -z $mkboot_from_dir ]; then
     rm -f $new_img
     mkboot_img $new_img || perr "Make boot.img Error! pls check img_info file."
     if grep -q "samsung" ramdisk/default.prop ; then
-        echo -n SEANDROIDENFORCE > $new_img
+        echo -n SEANDROIDENFORCE >> $new_img
     fi
     rm -f new_ramdisk
     clean
