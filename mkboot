@@ -24,6 +24,12 @@ C_OUT="\033[0;1m"
 C_ERR="\033[31;1m"
 C_CLEAR="\033[0;0m"
 
+if [ $(which ggrep) ]; then
+    grep="ggrep"
+else
+    grep="grep"
+fi
+
 pout() {
     printf "${C_OUT}${*}${C_CLEAR}\n"
 }
@@ -104,8 +110,8 @@ mkboot_img()
         --pagesize $page_size $second $dtb -o $1 || error=1
 
     [ $error -eq 1 ] && return $error
-    ramdisk_size=$(stat -c "%s" $ramdisk)
-    boot_size=$(stat -c "%s" $1)
+    ramdisk_size=$(gstat -c "%s" $ramdisk)
+    boot_size=$(gstat -c "%s" $1)
     pout "Kernel size: $kernel_size, new ramdisk size: $ramdisk_size, $(basename $1): $boot_size."
     pout "$(basename $1) has been created."
 }
@@ -144,7 +150,7 @@ if [ ! -z $mkboot_from_dir ]; then
         #    | $zcommand > $unpacked_dir/new_ramdisk; cd $unpacked_dir
         $mkbootfs $ramdisk | $zcommand > new_ramdisk
         ramdisk=new_ramdisk
-        ramdisk_size=$(stat -c "%s" $ramdisk)
+        ramdisk_size=$(gstat -c "%s" $ramdisk)
     fi
     print_info
     pout "ramdisk is $format format."
@@ -177,7 +183,7 @@ pout "Unpack & decompress $1 to $2"
 cp -f $1 $tempdir/
 cd $tempdir
 bootimg=$(basename $1)
-offset=$(grep -abo ANDROID! $bootimg | cut -f 1 -d :)
+offset=$($grep -abo ANDROID! $bootimg | cut -f 1 -d :)
 [ -z $offset ] && clean
 if [ $offset -gt 0 ]; then
     dd if=$bootimg of=bootimg bs=$offset skip=1 2>/dev/null
